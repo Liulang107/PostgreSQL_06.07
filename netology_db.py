@@ -23,7 +23,6 @@ def create_db():  # создает таблицы
     cur.execute(sql_create_students_table)
     cur.execute(sql_create_courses_table)
     cur.execute(sql_create_student_course_table)
-    conn.commit()
 
 
 def get_students(course_id):  # возвращает студентов определенного курса
@@ -43,13 +42,11 @@ def add_students(course_name, students):  # создает студентов и
         id_of_new_student = cur.fetchone()[0]
         cur.execute("INSERT INTO student_course (student_id, course_id) VALUES (%s, %s)",
                     (id_of_new_student, id_of_new_course))
-    conn.commit()
 
 
 def add_student(student):  # создает студента
     cur.execute("INSERT INTO student (name, gpa, birth) VALUES (%s, %s, %s)",
                 (student["name"], student["gpa"], student["birth"]))
-    conn.commit()
 
 
 def get_student(student_id):
@@ -60,9 +57,10 @@ def get_student(student_id):
 def work_with_netology_database():
     """
     gs – (get students) – команда, которая спросит id курса и отобразит имена студентов на курсе;
-    as – (add students) – команда, которая спросит данные студентов в формате: "Василий Гупкин; 5; 1991-10-10|<данные следующего студента>",
-    и спросит имя курса и добавит студентов на курс;
-    a – (add student) – команда, которая спросит данные студентов в формате: "Василий Гупкин; 3.5; 1991-10-10", - и добавит в список студентов;
+    as – (add students) – команда, которая спросит данные студентов в формате: "Василий Гупкин; 5;
+    1991-10-10|<данные следующего студента>", и спросит имя курса и добавит студентов на курс;
+    a – (add student) – команда, которая спросит данные студентов в формате: "Василий Гупкин; 3.5;
+    1991-10-10", - и добавит в список студентов;
     g – (get student) – команда, которая спросит id студента и отобразит данные о нем;
     q - (quit) - команда, которая завершает выполнение программы
     """
@@ -119,13 +117,11 @@ def work_with_netology_database():
             print(work_with_netology_database().__doc__)
 
         elif user_command == "q":
-            cur.close()
-            conn.close()
             break
 
 
 if __name__ == "__main__":
-    conn = psycopg2.connect("dbname=netology_db user=netology_user")
-    cur = conn.cursor()
-    create_db()
-    work_with_netology_database()
+    with psycopg2.connect("dbname=netology_db user=netology_user") as conn:
+        with conn.cursor() as cur:
+            create_db()
+            work_with_netology_database()
